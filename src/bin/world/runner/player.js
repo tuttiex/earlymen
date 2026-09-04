@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {Howl} from 'howler';
+import { CONFIG } from "../../../config.js";
 
 export default class Player {
     constructor(props) {
@@ -21,6 +22,11 @@ export default class Player {
 
         // For collision
         this.collider = new THREE.Box3();
+
+        // Lane system
+        this.currentLaneIndex = 1; // Start in middle lane (0 = left, 1 = center, 2 = right)
+        this.targetZ = CONFIG.LANE_POSITIONS[this.currentLaneIndex];
+        this.position.z = this.targetZ;
 
         this.sfxJump = new Howl({
             src: ['sfx/jump_02.wav'],
@@ -63,8 +69,24 @@ export default class Player {
                     this.jumped = true;
                     break;
                 }
+                case 'ArrowLeft': {
+                    this.switchLane(-1);
+                    break;
+                }
+                case 'ArrowRight': {
+                    this.switchLane(1);
+                    break;
+                }
             }
         });
+    }
+
+    switchLane(direction) {
+        const newLane = this.currentLaneIndex + direction;
+        if (newLane >= 0 && newLane < CONFIG.LANE_POSITIONS.length) {
+            this.currentLaneIndex = newLane;
+            this.targetZ = CONFIG.LANE_POSITIONS[this.currentLaneIndex];
+        }
     }
 
     load() {
@@ -122,6 +144,7 @@ export default class Player {
 
         const delta = this.clock.getDelta();
 
+        // Jump physics
         if (this.jumped && this.position.y === 0) {
             this.velocity.y = 8;
             this.sfxJump.play();
@@ -133,8 +156,15 @@ export default class Player {
 
         this.position.y = this.position.y + this.velocity.y * delta;
         this.velocity.y = this.velocity.y + this.gravity.y * delta;
+        this.position.y = Math.max(this.position.y, 0.0);
 
-        this.position.y = Math.max(this.position.y, 0.0)
+        // Lane switching (smooth interpolation)
+        const laneDelta = this.targetZ - this.position.z;
+        if (Math.abs(laneDelta) > 0.01) {
+            this.position.z += laneDelta * 10 * delta;
+        } else {
+            this.position.z = this.targetZ;
+        }
 
         if (this.mesh) {
             this.mesh.position.copy(this.position);
@@ -143,12 +173,12 @@ export default class Player {
     }
 
     checkCollisions(mesh) {
-        //this.collider.setFromObject(mesh);
-        this.collider.min.x = 0;
-        this.collider.max.x = 0.15;
+        // Set collider bounds relative to mesh position
+        this.collider.min.x = mesh.position.x - CONFIG.PLAYER_COLLIDER.WIDTH_X;
+        this.collider.max.x = mesh.position.x + CONFIG.PLAYER_COLLIDER.WIDTH_X;
         this.collider.min.y = mesh.position.y;
         this.collider.max.y = mesh.position.y + 0.15;
-        this.collider.min.z = 0;
-        this.collider.max.z = 0;
+        this.collider.min.z = mesh.position.z - CONFIG.PLAYER_COLLIDER.WIDTH_Z;
+        this.collider.max.z = mesh.position.z + CONFIG.PLAYER_COLLIDER.WIDTH_Z;
     }
 }

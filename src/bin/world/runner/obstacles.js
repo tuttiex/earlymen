@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Obstacle from "./obstackles/obstacle";
 import _ from 'lodash';
+import { CONFIG } from "../../../config.js";
 
 export default class Obstacles {
     constructor(props) {
@@ -37,7 +38,16 @@ export default class Obstacles {
 
                 this.delayRange = this.updateRange();
 
-                const object = new Obstacle({loader: this.loader, shadows: this.shadows, time: this.time, manager: this.manager});
+                // Random lane selection
+                const lane = _.random(0, CONFIG.LANE_POSITIONS.length - 1);
+
+                const object = new Obstacle({
+                    loader: this.loader,
+                    shadows: this.shadows,
+                    time: this.time,
+                    manager: this.manager,
+                    lane: lane
+                });
 
                 this.colliders.push(
                     object.collider

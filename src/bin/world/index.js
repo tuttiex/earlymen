@@ -75,5 +75,11 @@ export default class World {
     setRunnerGame() {
         this.runnerGame = new RunnerGame(this.getState());
         this.container.add(this.runnerGame.container);
+        
+        // Connect player to camera for following
+        if (this.camera && this.runnerGame.player) {
+            this.camera.player = this.runnerGame.player;
+            this.camera.setFollowPlayer();
+        }
     }
 }

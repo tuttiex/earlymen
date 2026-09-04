@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { CONFIG } from "../../../../config.js";
 
 export default class Obstacle {
     constructor(props) {
@@ -6,6 +7,7 @@ export default class Obstacle {
         this.shadows = props.shadows;
         this.time = props.time;
         this.manager = props.manager;
+        this.lane = props.lane || 0;
 
         this.container = new THREE.Object3D();
         this.container.name = "obstacle";
@@ -16,14 +18,15 @@ export default class Obstacle {
 
         this.init();
 
-        this.container.position.x = 8;
+        this.container.position.x = CONFIG.SPAWN_X;
+        this.container.position.z = CONFIG.LANE_POSITIONS[this.lane];
 
         this.time.on('tick', time => {
-            if (this.container.position.x < -3) {
+            if (this.container.position.x < CONFIG.DESPAWN_X) {
                 this.container.remove(this.container.children[0]);
             } else {
                 if (this.canFlow) {
-                    this.container.position.x -= 0.07;
+                    this.container.position.x -= CONFIG.OBSTACLE_SPEED;
                 }
 
                 this.collider.setFromObject(this.container);
