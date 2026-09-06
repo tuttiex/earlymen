@@ -1,22 +1,28 @@
 import * as THREE from 'three';
+import CONFIG from '../../config.js';
 
 export default class Floor {
     constructor(options) {
         this.container = new THREE.Object3D();
         this.container.name = 'floor';
+        this.time = options.time;
 
         this.createFloor();
+
+        this.time.on('tick', () => {
+            this.texture.offset.x += 0.035;
+        });
     }
 
     createFloor() {
         const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load('images/forest_ground.png');
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(10, 3);
+        this.texture = textureLoader.load('images/forest_ground.png');
+        this.texture.wrapS = THREE.RepeatWrapping;
+        this.texture.wrapT = THREE.RepeatWrapping;
+        this.texture.repeat.set(10, 3);
 
         this.geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-        this.material = new THREE.MeshPhongMaterial({ map: texture, color: 0xffffff });
+        this.material = new THREE.MeshPhongMaterial({ map: this.texture, color: 0xffffff });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
         this.mesh.position.set(0, -0.1, 0);
