@@ -9,7 +9,7 @@ import TWEEN from "@tweenjs/tween.js";
 export default class App {
     constructor(options) {
         this.canvas = options.canvas;
-        this.background = new THREE.Color('skyblue');
+        this.background = new THREE.Color('#9fb8a8');
 
         this.time = new Time();
         this.resizer = new Resizer();

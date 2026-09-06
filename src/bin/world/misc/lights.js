@@ -9,6 +9,6 @@ export default class Lights {
     }
 
     createLights() {
-        this.container.add(new THREE.HemisphereLight(0xffffff, '#d3681c', 1));
+        this.container.add(new THREE.HemisphereLight('#dcead9', '#4a5c3a', 1));
     }
 }
